@@ -1,12 +1,29 @@
 const multer = require("multer");
+const ShortUniqueId = require("short-unique-id");
+const uid = new ShortUniqueId({ length: 10 });
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads");
+    cb(null, "./uploads_dumps");
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    const regex = /\.([a-zA-Z0-9]+)$/;
+    console.log(
+      req.query.userid +
+        "_" +
+        uid.rnd() +
+        "." +
+        file.originalname.match(regex)[1]
+    );
+    cb(
+      null,
+      req.query.userid +
+        "_" +
+        uid.rnd() +
+        "." +
+        file.originalname.match(regex)[1]
+    );
   },
 });
 

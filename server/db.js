@@ -7,4 +7,4 @@ const sql = postgres({
   password: "postgres",
 });
 
-module.exports = { sql };
+module.exports = sql;
