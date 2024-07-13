@@ -23,18 +23,6 @@ app.get("/home", (req, res) => {
   }
 });
 
-// app.post("/testupload", upload.single("file"), (req, res) => {
-//   try {
-//     console.log(req.file);
-//     res.status(200);
-//     res.send("Done");
-//   } catch (error) {
-//     console.log(error);
-//     res.status(400);
-//     res.send(error);
-//   }
-// });
-
 app.post("/testapi", (req, res) => {
   try {
     console.log(req.body);
@@ -119,3 +107,15 @@ app.post("/api/analyze", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Listening to Port: ${PORT}`);
 });
+
+// app.post("/testupload", upload.single("file"), (req, res) => {
+//   try {
+//     console.log(req.file);
+//     res.status(200);
+//     res.send("Done");
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400);
+//     res.send(error);
+//   }
+// });
