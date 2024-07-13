@@ -2,6 +2,7 @@
 
 # dependencies
 /**/*/node_modules
+/vol-py
 
 # testing
 /coverage
