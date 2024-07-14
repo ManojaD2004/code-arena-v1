@@ -4,6 +4,7 @@
 /**/*/node_modules
 /vol-py
 /dumps
+/**/*/uploads_dumps
 
 # testing
 /coverage

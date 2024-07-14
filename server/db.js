@@ -5,6 +5,7 @@ const sql = postgres({
   database: "postgres",
   username: "postgres",
   password: "postgres",
+  max: 10,
 });
 
 module.exports = sql;
