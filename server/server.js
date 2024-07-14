@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const upload = require("./upload");
-const { executePluginV1, executePluginV2 } = require("./plugins");
+const { executePluginV1, executePluginV2, executePluginV3 } = require("./plugins");
 const sql = require("./db");
 const ShortUniqueId = require("short-unique-id");
 const uid = new ShortUniqueId({ length: 5 });
@@ -106,6 +106,7 @@ app.post("/api/analyze", async (req, res) => {
     const plugin = req.body.plugin;
     const profileName = req.body.profileName;
     const userid = req.query.userid;
+    const pid = req.body.pid;
     const fileNameLocRow =
       await sql`SELECT * FROM memory_dump WHERE id = ${fileId}`;
     if (fileNameLocRow.length === 0) {
@@ -115,14 +116,19 @@ app.post("/api/analyze", async (req, res) => {
     }
     const anaId = `${userid}_${plugin}_${uid.rnd()}`;
     await sql`INSERT INTO analysis (id, user_id, memory_dump_id, analysis_status) VALUES (${anaId}, ${fileNameLocRow[0].user_id}, ${fileNameLocRow[0].id}, 'in_progress')`;
-    if (plugin === "imageinfo") {
+    if (plugin === "imageinfo" || plugin === "kdbgscan") {
       executePluginV1(
         plugin,
         fileNameLocRow[0].memory_dump_loc,
         anaId,
         fileNameLocRow[0].user_id
       );
-    } else {
+    } else if (
+      plugin === "pslist" ||
+      plugin === "psscan" ||
+      plugin === "pstree" ||
+      plugin === "psxview"
+    ) {
       executePluginV2(
         plugin,
         fileNameLocRow[0].memory_dump_loc,
@@ -130,8 +136,20 @@ app.post("/api/analyze", async (req, res) => {
         anaId,
         fileNameLocRow[0].user_id
       );
+    } else if (
+      plugin === "handles" ||
+      plugin === "dlllist" 
+    ) {
+       executePluginV3(
+         plugin,
+         fileNameLocRow[0].memory_dump_loc,
+         profileName,
+         pid,
+         anaId,
+         fileNameLocRow[0].user_id
+       );
     }
-    res.status(200);
+      res.status(200);
     res.send({ status: "analysis_started", analysisId: anaId });
   } catch (error) {
     console.log(error);
@@ -175,11 +193,18 @@ app.get("/api/analysis/:analysisId/results", async (req, res) => {
   }
 });
 
-app.get("/api/analyses/:userid", async (req, res) => {
+app.get("/api/analyses", async (req, res) => {
   try {
-    const userid = req.params.userid;
+    const userid = req.query.userid;
     const result1 =
-      await sql`SELECT * FROM analysis WHERE user_id = ${userid};`;
+      await sql`SELECT * FROM analysis WHERE user_id = (SELECT id FROM users WHERE username = ${userid});`;
+    const utcDate = new Date(result1[0].date_time);
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(utcDate.getTime() + istOffset);
+    const istDateString = istDate.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
+    result1[0].date_time = istDateString;
     res.status(200);
     res.send({ analyses: result1 });
   } catch (error) {
