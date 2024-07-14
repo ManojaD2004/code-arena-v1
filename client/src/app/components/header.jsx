@@ -4,7 +4,7 @@ import SignIn from "./signin";
 import SignOut from "./signout";
 import Link from "next/link";
 
-export default async function Header() {
+export default async function Header1() {
   const session = await auth();
   console.log(session);
   return (
@@ -15,8 +15,9 @@ export default async function Header() {
         </Link>
         <ul className="flex gap-6 list-none font-medium text-[#0b3557] items-center">
           <Link href={"/upload-memory"}>Upload memory</Link>
-          <Link href={"/analysis"}>Analysis</Link>
+         
           <Link href={"/history"}>History</Link>
+          <Link href={"/select-plugins"}>Select Plugins</Link>
         </ul>
       </div>
       <div className="flex gap-6 list-none text-black items-center ">
