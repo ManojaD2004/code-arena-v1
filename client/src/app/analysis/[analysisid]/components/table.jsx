@@ -58,24 +58,27 @@ import { nodes } from "./data";
 
 const key = "Showreel";
 
-const Component = () => {
+const Component = ({ params }) => {
   const router = useRouter();
   const [data, setData] = React.useState({ nodes });
-
+  // console.log(data);
 
   useEffect(() => {
     async function getData(params) {
-      const response = await fetch(`/api/analysis/${params}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/analysis/${params}/results`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const result = await response.json();
-      console.log(result);
-
-      setData(result);
+      const jsonData = await JSON.parse(result.results);
+      console.log(jsonData);
+      setData({ nodes: jsonData });
     }
-    getData();
+    getData(params);
   }, []);
 
   //* Theme *//
@@ -145,8 +148,8 @@ const Component = () => {
     onChange: onSelectChange,
   });
 
-  function onSelectChange( state,action) {
-    console.log( state);
+  function onSelectChange(state, action) {
+    console.log(state);
   }
 
   //* Tree *//
@@ -156,7 +159,13 @@ const Component = () => {
   const sort = useSort(
     data,
     {
-      onChange: onSortChange,
+      onChange: onSortChange, // if (key === "name") {
+      //   column.select = {
+      //     renderHeaderCellSelect: () => null,
+      //     renderCellSelect: (item) => null,
+      //   };
+      //   column.tree = true;
+      // }
     },
     {
       sortIcon: {
@@ -183,29 +192,27 @@ const Component = () => {
 
   //* Modal *//
 
-  
-
   //* Custom Modifiers *//
 
-  let modifiedNodes = data.nodes;
+  // let modifiedNodes = data.nodes;
 
   // search
-  modifiedNodes = modifiedNodes.filter((node) =>
-    node.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // modifiedNodes = modifiedNodes.filter((node) =>
+  //   node.name.toLowerCase().includes(search.toLowerCase())
+  // );
 
   // filter
-  modifiedNodes = isHide
-    ? modifiedNodes.filter((node) => !node.isComplete)
-    : modifiedNodes;
+  // modifiedNodes = isHide
+  //   ? modifiedNodes.filter((node) => !node.isComplete)
+  //   : modifiedNodes;
 
   //* Columns *//
   const handleRowClick = (name) => {
-  console.log(name);
+    console.log(name);
   };
+  // console.log(data);
 
-  const COLUMNS = Object.keys(nodes[0]).map((key) => {
-    
+  const COLUMNS = Object.keys(data.nodes[0]).map((key) => {
     let column = {
       label: key.toUpperCase(),
       renderCell: (item) => item[key],
@@ -213,49 +220,24 @@ const Component = () => {
       sort: { sortKey: key.toUpperCase() },
     };
 
-    if (key === "name") {
-      column.select = {
-        renderHeaderCellSelect: () => null,
-        renderCellSelect: (item) => null,
-      };
-      column.tree = true;
-    }
+    // if (key === "name") {
+    //   column.select = {
+    //     renderHeaderCellSelect: () => null,
+    //     renderCellSelect: (item) => null,
+    //   };
+    //   column.tree = true;
+    // }
 
-    if (key === "deadline") {
-      column.renderCell = (item) =>
-        item.deadline.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
-
-  }
-  if(key==="delete"){
-    column.renderCell= (item) => (
-      <button
-  onClick={() => handleRowClick(item.name)}
-  cursor="pointer"
-  style={{ backgroundColor: 'red', color: 'white' }}
->
-  Delete
-</button>
-    )
-  }
-    
+ 
 
     return column;
   });
 
-
   return (
     <>
-     
-
       {/* Form */}
 
       <HStack m={3}>
-        
-
         <InputGroup>
           <InputLeftElement
             pointerEvents="none"
@@ -268,14 +250,13 @@ const Component = () => {
           />
         </InputGroup>
         <Checkbox
-          style={{ whiteSpace: 'nowrap' }}
+          style={{ whiteSpace: "nowrap" }}
           colorScheme="teal"
           isChecked={isHide}
           onChange={(event) => setHide(event.target.checked)}
         >
           Hide Complete
         </Checkbox>
-        
       </HStack>
 
       {/* Table */}
@@ -283,7 +264,7 @@ const Component = () => {
       <Box p={3} borderWidth="1px" borderRadius="lg">
         <CompactTable
           columns={COLUMNS}
-          data={{ ...data, nodes: modifiedNodes }}
+          data={{ ...data, nodes: data.nodes }}
           theme={theme}
           layout={{ custom: true }}
           select={select}
@@ -303,7 +284,7 @@ const Component = () => {
           onClick={() => pagination.fns.onSetPage(pagination.state.page - 1)}
         />
 
-        {pagination.state.getPages(modifiedNodes).map((_, index) => (
+        {pagination.state.getPages(data.nodes).map((_, index) => (
           <Button
             key={index}
             colorScheme="teal"

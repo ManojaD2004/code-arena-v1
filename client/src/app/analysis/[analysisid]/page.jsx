@@ -4,12 +4,13 @@ import Component from './components/table'
 
 import Header1 from '../../components/header'
 
-const Page = () => {
+const Page = ({params}) => {
+  // console.log(params);
   return (
     <ChakraProvider>
         <Header1/>
         <div className='p-[40px] pt-[150px]'>
-        <Component/>
+        <Component params={params.analysisid}/>
         </div>
     </ChakraProvider>
   )
